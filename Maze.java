@@ -5,6 +5,8 @@ public class Maze{
 
     private char[][]maze;
     private boolean animate;//false by default
+    private int rowSize;
+    private int colSize;
 
     /*Constructor loads a maze text file, and sets animate to false by default.
 
@@ -26,6 +28,24 @@ public class Maze{
 
     public Maze(String filename) throws FileNotFoundException{
         //COMPLETE CONSTRUCTOR
+        ArrayList<String> map = new ArrayList<String>();
+        rowSize = 0;
+        colSize = 0;
+        File text = new File("input.txt");
+        Scanner info = new Scanner(text);
+        while (info.hasNextLine()){
+          map.add(info.nextLine());
+          rowSize++;
+          colSize = info.nextLine().length();
+        }
+        maze = new char[rowSize][colSize];
+        //map stored the maze from the file, now transfer it to the maze array
+        for (int row = 0; row < rowSize; row++){
+          for (int col = 0; col < colSize; col++){
+            maze[row][col] = map.get(row).charAt(col); //extract the individual char from the string arraylist
+          }
+        }
+        animate = false;
     }
 
 
@@ -39,9 +59,7 @@ public class Maze{
 
 
     public void setAnimate(boolean b){
-
         animate = b;
-
     }
 
 
@@ -64,9 +82,22 @@ public class Maze{
 
     */
     public String toString(){
+      String ans = "";
+      for (int row = 0; row < rowSize; row++){
+        for (int col = 0; col < colSize; col++){
+          ans += maze[row][col];
+        }
+      }
+      return ans;
 
-            return "WRITE THIS METHOD";
+    }
 
+    public boolean takeStep(int row, int col){
+      if (maze[row][col] == ' ' || maze[row][col] == 'S'){
+        maze[row][col] = '@';
+        return true;
+      }
+      return false;
     }
 
 
@@ -79,10 +110,16 @@ public class Maze{
     */
     public int solve(){
 
-            //find the location of the S.
+      //find the location of the S.
+      for (int row = 0; row < rowSize; row++){
+        for (int col = 0; col < colSize; col++){
+          if (maze[row][col] == 'S'){
+            takeStep(row,col);
+          }
+        }
+      }
 
-
-            //erase the S
+      //erase the S
 
 
             //and start solving at the location of the s.
@@ -121,6 +158,8 @@ public class Maze{
         }
 
         //COMPLETE SOLVE
+
+
 
         return -1; //so it compiles
     }
