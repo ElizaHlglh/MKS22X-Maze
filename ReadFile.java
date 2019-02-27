@@ -14,7 +14,7 @@ public class ReadFile {
         System.out.println(line);//hopefully you can do other things with the line
     }
 
-    
+
     String[][] maze = new String[][];
   }
 }
