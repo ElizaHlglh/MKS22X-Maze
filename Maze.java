@@ -7,6 +7,8 @@ public class Maze{
     private boolean animate;//false by default
     private int rowSize;
     private int colSize;
+    private int[] moveRow;
+    private int[] moveCol;
 
     /*Constructor loads a maze text file, and sets animate to false by default.
 
@@ -46,6 +48,8 @@ public class Maze{
           }
         }
         animate = false;
+        moveRow = new int[]{1,-1};
+        moveCol = new int[]{1,-1};
     }
 
 
@@ -72,10 +76,6 @@ public class Maze{
     }
 
 
-
-
-
-
    /*Return the string that represents the maze.
 
      It should look like the text file with some characters replaced.
@@ -100,6 +100,15 @@ public class Maze{
       return false;
     }
 
+    public boolean backStep(int row, int col){
+      maze[row][col] = '.';
+      return true;
+    }
+
+    public boolean isEmpty(int row, int col){
+      return maze[row][col] == ' ';
+    }
+
 
 
     /*Wrapper Solve Function returns the helper function
@@ -109,23 +118,22 @@ public class Maze{
 
     */
     public int solve(){
-
+      int startingR = 0;
+      int startingC = 0;
       //find the location of the S.
       for (int row = 0; row < rowSize; row++){
         for (int col = 0; col < colSize; col++){
           if (maze[row][col] == 'S'){
-            takeStep(row,col);
+            startingR = row;
+            startingC = col;
           }
         }
       }
+      takeStep(startingR,startingC); //erase the S
+      //and start solving at the location of the s.
 
-      //erase the S
-
-
-            //and start solving at the location of the s.
-
-            //return solve(???,???);
-
+      //return solve(???,???);
+      return 1;
     }
 
     /*
@@ -146,22 +154,34 @@ public class Maze{
         All visited spots that are part of the solution are changed to '@'
     */
     private int solve(int row, int col){ //you can add more parameters since this is private
-
-
-        //automatic animation! You are welcome.
-        if(animate){
-
-            clearTerminal();
-            System.out.println(this);
-
-            wait(20);
+      //automatic animation! You are welcome.
+      if(animate){
+        clearTerminal();
+        System.out.println(this);
+        wait(20);
+      }
+      //COMPLETE SOLVE
+      if (maze[row][col] == 'E'){
+        return 1;
+      }
+      else{
+        //find the possible future moves
+        ArrayList<Integer> RowList = new ArrayList<Integer>();
+        ArrayList<Integer> ColList = new ArrayList<Integer>();
+        for (int i = 0; i < 2; i++){
+          if (row + moveRow[i] >= 0 && row + moveRow[i] < rowSize && maze[row+moveRow[i]][col] == ' '){
+            RowList.add(row+moveRow[i]);
+            ColList.add(col);
+          }
+          if (col + moveCol[i] >= 0 && col + moveCol[i] < colSize && maze[row][col+moveCol[i]] == ' '){
+            RowList.add(row);
+            ColList.add(col+moveCol[i]);
+          }
         }
+        
+      }
 
-        //COMPLETE SOLVE
-
-
-
-        return -1; //so it compiles
+      return -1; //so it compiles
     }
 
 
