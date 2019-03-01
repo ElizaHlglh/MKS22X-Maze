@@ -9,6 +9,7 @@ public class Maze{
     private int colSize;
     private int[] moveRow;
     private int[] moveCol;
+    private ArrayList<String> map;
 
     /*Constructor loads a maze text file, and sets animate to false by default.
 
@@ -30,16 +31,16 @@ public class Maze{
 
     public Maze(String filename) throws FileNotFoundException{
         //COMPLETE CONSTRUCTOR
-        ArrayList<String> map = new ArrayList<String>();
+        map = new ArrayList<String>();
         rowSize = 0;
         colSize = 0;
-        File text = new File("input.txt");
+        File text = new File(filename);
         Scanner info = new Scanner(text);
         while (info.hasNextLine()){
           map.add(info.nextLine());
           rowSize++;
-          colSize = info.nextLine().length();
         }
+        colSize = map.get(0).length();
         maze = new char[rowSize][colSize];
         //map stored the maze from the file, now transfer it to the maze array
         for (int row = 0; row < rowSize; row++){
@@ -87,14 +88,26 @@ public class Maze{
         for (int col = 0; col < colSize; col++){
           ans += maze[row][col];
         }
+        ans += "\n";
       }
       return ans;
 
     }
 
+    public void clear(){
+      for (int row = 0; row < rowSize; row++){
+        for (int col = 0; col < colSize; col++){
+          maze[row][col] = map.get(row).charAt(col); //extract the individual char from the string arraylist
+        }
+      }
+    }
+
     public boolean takeStep(int row, int col){
       if (maze[row][col] == ' ' || maze[row][col] == 'S'){
         maze[row][col] = '@';
+        return true;
+      }
+      if (maze[row][col] == 'E'){
         return true;
       }
       return false;
@@ -131,9 +144,8 @@ public class Maze{
       }
       takeStep(startingR,startingC); //erase the S
       //and start solving at the location of the s.
-
       //return solve(???,???);
-      return 1;
+      return solve2(startingR,startingC,0);
     }
 
     /*
@@ -153,36 +165,103 @@ public class Maze{
 
         All visited spots that are part of the solution are changed to '@'
     */
-    private int solve(int row, int col){ //you can add more parameters since this is private
+    private int solve(int row, int col, int step){ //you can add more parameters since this is private
       //automatic animation! You are welcome.
       if(animate){
         clearTerminal();
         System.out.println(this);
-        wait(20);
+        wait(200);
       }
       //COMPLETE SOLVE
       if (maze[row][col] == 'E'){
-        return 1;
+        System.out.println("" + step);
+        return step-1; //walking into E count as one so reduce one step
+      }
+      //if doesn't reach a solution, return -1
+      else{
+        //find the possible future moves
+        ArrayList<Integer> RowList = new ArrayList<Integer>();
+        ArrayList<Integer> ColList = new ArrayList<Integer>();
+        for (int i = 0; i < 2; i++){
+          if (/*row + moveRow[i] >= 0 && row + moveRow[i] < rowSize &&*/ (maze[row+moveRow[i]][col] == ' ' || maze[row+moveRow[i]][col] == 'E')){
+            RowList.add(row+moveRow[i]);
+            ColList.add(col);
+          }
+          if (/*col + moveCol[i] >= 0 && col + moveCol[i] < colSize &&*/ (maze[row][col+moveCol[i]] == ' ' || maze[row][col+moveCol[i]] == 'E')) {
+            RowList.add(row);
+            ColList.add(col+moveCol[i]);
+          }
+        }
+        System.out.println(RowList);
+        System.out.println(ColList);
+        //after constructing the future moves, go on to try taking steps on each valid moves
+        for (int l = 0; l < RowList.size(); l++){
+          if (takeStep(RowList.get(l), ColList.get(l))){
+            if (solve(RowList.get(l), ColList.get(l), step+1) == -1){
+              backStep(RowList.get(l), ColList.get(l));
+            }
+            else{
+              solve(RowList.get(l), ColList.get(l), step+1);
+            }
+          }
+        }
+        return -1;
+      }
+    }
+
+    private int solve2(int row, int col, int step){ //you can add more parameters since this is private
+      //automatic animation! You are welcome.
+      if(animate){
+        clearTerminal();
+        System.out.println(this);
+        wait(200);
+      }
+      //COMPLETE SOLVE
+      if (maze[row][col] == 'E'){
+        System.out.println("Currently at the answer: " + step);
+        return step; //walking into E count as one so reduce one step
       }
       else{
         //find the possible future moves
         ArrayList<Integer> RowList = new ArrayList<Integer>();
         ArrayList<Integer> ColList = new ArrayList<Integer>();
         for (int i = 0; i < 2; i++){
-          if (row + moveRow[i] >= 0 && row + moveRow[i] < rowSize && maze[row+moveRow[i]][col] == ' '){
+          if (/*row + moveRow[i] >= 0 && row + moveRow[i] < rowSize &&*/ (maze[row+moveRow[i]][col] == ' ' || maze[row+moveRow[i]][col] == 'E')){
             RowList.add(row+moveRow[i]);
             ColList.add(col);
           }
-          if (col + moveCol[i] >= 0 && col + moveCol[i] < colSize && maze[row][col+moveCol[i]] == ' '){
+          if (/*col + moveCol[i] >= 0 && col + moveCol[i] < colSize &&*/ (maze[row][col+moveCol[i]] == ' ' || maze[row][col+moveCol[i]] == 'E')) {
             RowList.add(row);
             ColList.add(col+moveCol[i]);
           }
         }
-        
+        if (RowList.size() == 0){
+          return -1;
+        }
+        //after constructing the future moves, go on to try taking steps on each valid moves
+        for (int l = 0; l < RowList.size(); l++){
+          /*if (takeStep(RowList.get(l), ColList.get(l))){
+            if (solve2(RowList.get(l), ColList.get(l), step+1) >= 0){
+              backStep(RowList.get(l), ColList.get(l));
+            }
+            else{
+              solve2(RowList.get(l), ColList.get(l), step+1);
+            }
+          }*/
+          if (takeStep(RowList.get(l), ColList.get(l))){
+            if (solve2(RowList.get(l), ColList.get(l), step+1) >= 0){
+              return step;
+            }
+            else{
+              backStep(RowList.get(l), ColList.get(l));
+            }
+          }
+        }
+        return -1;
       }
-
-      return -1; //so it compiles
     }
+
+
 
 
 }
