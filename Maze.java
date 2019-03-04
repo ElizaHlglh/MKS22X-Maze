@@ -164,7 +164,7 @@ public class Maze{
     */
     public int solve(){
       if (!isClean()){
-        return 0;
+        return -1;
       }
       steps = 0;
       int startingR = 0;
@@ -181,7 +181,10 @@ public class Maze{
       takeStep(startingR,startingC); //erase the S
       //and start solving at the location of the s.
       //return solve(???,???);
-      solve2(startingR,startingC,0);
+      solve(startingR,startingC,0);
+      if (steps <= 0){ //if no answer reached
+        return -1;
+      }
       int ans = steps;
       steps = 0;
       return ans;
@@ -204,7 +207,7 @@ public class Maze{
 
         All visited spots that are part of the solution are changed to '@'
     */
-    private int solve(int row, int col, int step){ //you can add more parameters since this is private
+    private int solve2(int row, int col, int step){ //WRONG FUNCTION/METHOD
       //automatic animation! You are welcome.
       if(animate){
         clearTerminal();
@@ -236,11 +239,11 @@ public class Maze{
         //after constructing the future moves, go on to try taking steps on each valid moves
         for (int l = 0; l < RowList.size(); l++){
           if (takeStep(RowList.get(l), ColList.get(l))){
-            if (solve(RowList.get(l), ColList.get(l), step+1) == -1){
+            if (solve2(RowList.get(l), ColList.get(l), step+1) == -1){
               backStep(RowList.get(l), ColList.get(l));
             }
             else{
-              solve(RowList.get(l), ColList.get(l), step+1);
+              solve2(RowList.get(l), ColList.get(l), step+1);
             }
           }
         }
@@ -248,7 +251,7 @@ public class Maze{
       }
     }
 
-    private int solve2(int row, int col, int step){ //you can add more parameters since this is private
+    private int solve(int row, int col, int step){ //you can add more parameters since this is private
       //automatic animation! You are welcome.
       if(animate){
         clearTerminal();
@@ -289,7 +292,7 @@ public class Maze{
             }
           }*/
           if (takeStep(RowList.get(l), ColList.get(l))){
-            if (solve2(RowList.get(l), ColList.get(l), step+1) >= 0){
+            if (solve(RowList.get(l), ColList.get(l), step+1) >= 0){
               return step;
             }
             else{
