@@ -10,6 +10,7 @@ public class Maze{
     private int[] moveRow;
     private int[] moveCol;
     private ArrayList<String> map;
+    private int steps;
 
     /*Constructor loads a maze text file, and sets animate to false by default.
 
@@ -47,6 +48,9 @@ public class Maze{
           for (int col = 0; col < colSize; col++){
             maze[row][col] = map.get(row).charAt(col); //extract the individual char from the string arraylist
           }
+        }
+        if (!hasSE()){
+          throw new FileNotFoundException();
         }
         animate = false;
         moveRow = new int[]{1,-1};
@@ -100,6 +104,7 @@ public class Maze{
           maze[row][col] = map.get(row).charAt(col); //extract the individual char from the string arraylist
         }
       }
+      steps = 0;
     }
 
     public boolean takeStep(int row, int col){
@@ -122,6 +127,33 @@ public class Maze{
       return maze[row][col] == ' ';
     }
 
+    public boolean isClean(){
+      for (int row = 0; row < rowSize; row++){
+        for (int col = 0; col < colSize; col++){
+          if (maze[row][col] != map.get(row).charAt(col)){
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    private boolean hasSE(){
+      boolean yesE = false;
+      boolean yesS = false;
+      for (int row = 0; row < rowSize; row++){
+        for (int col = 0; col < colSize; col++){
+          if (maze[row][col] == 'E'){
+            yesE = true;
+          }
+          if (maze[row][col] == 'S'){
+            yesS = true;
+          }
+        }
+      }
+      return yesE && yesS;
+    }
+
 
 
     /*Wrapper Solve Function returns the helper function
@@ -131,6 +163,10 @@ public class Maze{
 
     */
     public int solve(){
+      if (!isClean()){
+        return 0;
+      }
+      steps = 0;
       int startingR = 0;
       int startingC = 0;
       //find the location of the S.
@@ -145,7 +181,10 @@ public class Maze{
       takeStep(startingR,startingC); //erase the S
       //and start solving at the location of the s.
       //return solve(???,???);
-      return solve2(startingR,startingC,0);
+      solve2(startingR,startingC,0);
+      int ans = steps;
+      steps = 0;
+      return ans;
     }
 
     /*
@@ -218,7 +257,8 @@ public class Maze{
       }
       //COMPLETE SOLVE
       if (maze[row][col] == 'E'){
-        System.out.println("Currently at the answer: " + step);
+        //System.out.println("Currently at the answer: " + step);
+        steps = step;
         return step; //walking into E count as one so reduce one step
       }
       else{
@@ -226,11 +266,11 @@ public class Maze{
         ArrayList<Integer> RowList = new ArrayList<Integer>();
         ArrayList<Integer> ColList = new ArrayList<Integer>();
         for (int i = 0; i < 2; i++){
-          if (/*row + moveRow[i] >= 0 && row + moveRow[i] < rowSize &&*/ (maze[row+moveRow[i]][col] == ' ' || maze[row+moveRow[i]][col] == 'E')){
+          if ((maze[row+moveRow[i]][col] == ' ' || maze[row+moveRow[i]][col] == 'E')){
             RowList.add(row+moveRow[i]);
             ColList.add(col);
           }
-          if (/*col + moveCol[i] >= 0 && col + moveCol[i] < colSize &&*/ (maze[row][col+moveCol[i]] == ' ' || maze[row][col+moveCol[i]] == 'E')) {
+          if ((maze[row][col+moveCol[i]] == ' ' || maze[row][col+moveCol[i]] == 'E')) {
             RowList.add(row);
             ColList.add(col+moveCol[i]);
           }
